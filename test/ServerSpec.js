@@ -226,24 +226,24 @@ describe('', function() {
 
   }); // 'Link creation'
 
-  xdescribe('Privileged Access:', function() {
+  describe('Privileged Access:', function() {
 
     it('Redirects to login page if a user tries to access the main page and is not signed in', function(done) {
-      request('http://127.0.0.1:4568/', function(error, res, body) {
+      request('http://127.0.0.1:3003/', function(error, res, body) {
         expect(res.req.path).to.equal('/login');
         done();
       });
     });
 
     it('Redirects to login page if a user tries to access the create page and is not signed in', function(done) {
-      request('http://127.0.0.1:4568/create', function(error, res, body) {
+      request('http://127.0.0.1:3003/create', function(error, res, body) {
         expect(res.req.path).to.equal('/login');
         done();
       });
     });
 
     it('Redirects to login page if a user tries to see all of the links and is not signed in', function(done) {
-      request('http://127.0.0.1:4568/links', function(error, res, body) {
+      request('http://127.0.0.1:3003/links', function(error, res, body) {
         expect(res.req.path).to.equal('/login');
         done();
       });
@@ -285,7 +285,7 @@ describe('', function() {
     it('Signup logs in a new user', function(done) {
       var options = {
         'method': 'POST',
-        'uri': 'http://127.0.0.1:4568/signup',
+        'uri': 'http://127.0.0.1:3003/signup',
         'json': {
           'username': 'Phillip',
           'password': 'Phillip'
@@ -300,7 +300,7 @@ describe('', function() {
 
   }); // 'Account Creation'
 
-  xdescribe('Account Login:', function() {
+  describe('Account Login:', function() {
 
     var requestWithSession = request.defaults({jar: true});
 
@@ -316,7 +316,7 @@ describe('', function() {
     it('Logs in existing users', function(done) {
       var options = {
         'method': 'POST',
-        'uri': 'http://127.0.0.1:4568/login',
+        'uri': 'http://127.0.0.1:3003/login',
         'json': {
           'username': 'Phillip',
           'password': 'Phillip'
@@ -332,7 +332,7 @@ describe('', function() {
     it('Users that do not exist are kept on login page', function(done) {
       var options = {
         'method': 'POST',
-        'uri': 'http://127.0.0.1:4568/login',
+        'uri': 'http://127.0.0.1:3003/login',
         'json': {
           'username': 'Fred',
           'password': 'Fred'

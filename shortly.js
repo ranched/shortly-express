@@ -2,7 +2,7 @@ var express = require('express');
 var util = require('./lib/utility');
 var partials = require('express-partials');
 var bodyParser = require('body-parser');
-
+var session = require('express-session');
 
 var db = require('./app/config');
 var Users = require('./app/collections/users');
@@ -10,6 +10,7 @@ var User = require('./app/models/user');
 var Links = require('./app/collections/links');
 var Link = require('./app/models/link');
 var Click = require('./app/models/click');
+//var bookshelf = require('./app.config');
 
 var app = express();
 
@@ -21,23 +22,38 @@ app.use(bodyParser.json());
 // Parse forms (signup/login)
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(__dirname + '/public'));
+app.use(session({secret: 'hackreactor'}));
 
 
 app.get('/', 
   function(req, res) {
-    res.render('index');
+    // console.log(sess);
+    if (req.session.username) {
+      res.render('index');
+    } else {
+      res.redirect('/login');
+    }
   });
 
 app.get('/create', 
   function(req, res) {
-    res.render('index');
+    if (req.session.username) {
+      res.render('index');
+    } else {
+      res.redirect('/login');
+    }
   });
 
 app.get('/links', 
   function(req, res) {
-    Links.reset().fetch().then(function(links) {
-      res.status(200).send(links.models);
-    });
+    
+    if (req.session.username) {
+      Links.reset().fetch().then(function(links) {
+        res.status(200).send(links.models);
+      });
+    } else {
+      res.redirect('/login');
+    }
   });
 
 app.post('/links', 
@@ -92,36 +108,34 @@ app.post('/signup', function(req, res) {
     }).then(function() {
       res.status(200).redirect('/');
     });
-  //fetch()
-  //   .then(function(found) {
-  //   if (found) {
-  //     res.status(200).send(found.attributes);
-  //   } else {
-  //       console.log("inside true");
-
-  //     util.isRegisteredUser(req.body.username).then(function(err, result) {
-  //       if (err) {
-  //         console.log('Error reading from database: ', err);
-  //         return res.sendStatus(404);
-  //       }
-  //       if (result) {
-  //         Users.create({
-  //           username: req.body.username,
-  //           password: req.body.password
-  //         })
-  //           .then(function(newLink) {
-  //             res.status(200).send(newLink);
-  //           });
-  //       } else {
-  //         res.status(400).send('User already exists');
-          
-  //       }
-  //     });
-  //   }
-  // });
   
 });
 
+app.get('/login', function(req, res) {
+  
+  //req.session.username = 'nameHere';
+  //console.log('--------Request: ', req);
+  //console.log('--------Session: ', sess);
+  // sess.username = req.body.username;
+  res.render('login');
+});
+
+app.post('/login', function(req, res) {
+  
+  var { username, password } = req.body;
+  
+  console.log('request body', req.body);
+  new User({username: username}).fetch().then(function(found) {
+    if (found) {
+      console.log('User found in DB');
+      req.session.username = username;
+      res.status(200).redirect('/');
+    } else {
+      console.log('Error: user not found');
+      res.redirect('/login');
+    }
+  });
+});
 
 /************************************************************/
 // Handle the wildcard route last - if all other routes fail
