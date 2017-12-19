@@ -3,6 +3,8 @@ var util = require('./lib/utility');
 var partials = require('express-partials');
 var bodyParser = require('body-parser');
 var session = require('express-session');
+var bcrypt = require('bcrypt-nodejs');
+
 
 var db = require('./app/config');
 var Users = require('./app/collections/users');
@@ -22,7 +24,10 @@ app.use(bodyParser.json());
 // Parse forms (signup/login)
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(__dirname + '/public'));
-app.use(session({secret: 'hackreactor'}));
+app.use(session({
+  secret: 'hackreactor',
+  maxAge: 20000
+}));
 
 
 app.get('/', 
@@ -102,6 +107,7 @@ app.post('/signup', function(req, res) {
   new User(req.body).save()
     .then(function() {
       console.log('Success!!');
+      req.session.username = username;
     }).catch(function (err) {
       console.log('Error!');
       console.log(err);
@@ -109,6 +115,10 @@ app.post('/signup', function(req, res) {
       res.status(200).redirect('/');
     });
   
+});
+
+app.get('/signup', function(req, res) {
+  res.render('signup');
 });
 
 app.get('/login', function(req, res) {
@@ -125,16 +135,29 @@ app.post('/login', function(req, res) {
   var { username, password } = req.body;
   
   console.log('request body', req.body);
-  new User({username: username}).fetch().then(function(found) {
-    if (found) {
-      console.log('User found in DB');
-      req.session.username = username;
-      res.status(200).redirect('/');
-    } else {
-      console.log('Error: user not found');
-      res.redirect('/login');
-    }
-  });
+  new User({username: username})
+    .fetch()
+    
+    .then(function(found) {
+      bcrypt.compare(req.body.password, this.attributes.password, function(err, match) {
+        console.log('match:', match);
+        if (match) {
+          console.log('User found in DB');
+          req.session.username = username;
+          res.status(200).redirect('/');
+        } else {
+          console.log('Error: user not found or bad password');
+          res.redirect('/login');
+        } 
+      });
+      
+    
+    });
+});
+
+app.get('/logout', function(req, res) {
+  req.session.destroy();
+  res.render('login');
 });
 
 /************************************************************/
