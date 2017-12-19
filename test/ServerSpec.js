@@ -52,7 +52,7 @@ describe('', function() {
       .where('username', '=', 'Svnh')
       .del()
       .catch(function(error) {
-       // uncomment when writing authentication tests
+        // uncomment when writing authentication tests
         throw {
           type: 'DatabaseError',
           message: 'Failed to create test setup data'
