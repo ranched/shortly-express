@@ -75,7 +75,52 @@ function(req, res) {
 /************************************************************/
 // Write your authentication routes here
 /************************************************************/
+app.post('/signup', function(req, res) {
+  // console.log(typeof req.body);
+  // var newData = new User(req.body);
+  // newData.save()
+  //   .then( function(newUser) { res.status(200).send(newUser); } );//new User(req);
+  //console.log(req);
+  var { username, password } = req.body;
+  
+  new User(req.body).save()
+    .then(function() {
+      console.log('Success!!');
+    }).catch(function (err) {
+      console.log('Error!');
+      console.log(err);
+    }).then(function() {
+      res.status(200).send('Inserted');
+    });
+  //fetch()
+  //   .then(function(found) {
+  //   if (found) {
+  //     res.status(200).send(found.attributes);
+  //   } else {
+  //       console.log("inside true");
 
+  //     util.isRegisteredUser(req.body.username).then(function(err, result) {
+  //       if (err) {
+  //         console.log('Error reading from database: ', err);
+  //         return res.sendStatus(404);
+  //       }
+  //       if (result) {
+  //         Users.create({
+  //           username: req.body.username,
+  //           password: req.body.password
+  //         })
+  //           .then(function(newLink) {
+  //             res.status(200).send(newLink);
+  //           });
+  //       } else {
+  //         res.status(400).send('User already exists');
+          
+  //       }
+  //     });
+  //   }
+  // });
+  
+});
 
 
 /************************************************************/
